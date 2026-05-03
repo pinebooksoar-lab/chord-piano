@@ -1,281 +1,683 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Chord Piano - Full Restore</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Chord Piano - Improved Edition</title>
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400&display=swap');
 
-:root {
-  --bg: #0e0e12; --surface: #16161e; --card: #1e1e2a; --border: #2a2a3a;
-  --accent: #c8a96e; --accent2: #7eb8c8; --text: #e8e4dc; --muted: #6e6a62;
+:root{
+  --bg:#0e0e12;
+  --surface:#16161e;
+  --card:#1e1e2a;
+  --border:#2a2a3a;
+  --accent:#c8a96e;
+  --accent2:#7eb8c8;
+  --text:#e8e4dc;
+  --muted:#7b776f;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace;
-  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-  padding: 24px 12px; overflow-x: hidden;
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
 
-.main-col { width: 100%; max-width: 600px; }
-header { text-align: center; margin-bottom: 20px; }
-h1 { font-family: 'Playfair Display', serif; color: var(--accent); font-size: 2rem; }
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Mono', monospace;
+  min-height:100vh;
+  padding:24px 12px 40px;
+  display:flex;
+  justify-content:center;
+}
 
-#visualizer { width: 100%; height: 60px; margin-bottom: 16px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); position: relative; overflow: hidden; }
-#vis-canvas { width: 100%; height: 100%; }
-.chord-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--accent); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.main-col{
+  width:100%;
+  max-width:700px;
+}
 
-.keyboard-wrap { width: 100%; overflow-x: auto; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border); background: #111; padding: 10px; scrollbar-width: none; }
-#keyboard { position: relative; height: 110px; width: max-content; margin: 0 auto; }
-.key { position: absolute; border-radius: 0 0 4px 4px; cursor: pointer; transition: background 0.1s; }
-.key.white { background: #eee; border: 1px solid #999; width: 34px; height: 110px; z-index: 1; }
-.key.black { background: #222; width: 22px; height: 66px; z-index: 2; border: 1px solid #000; }
-.key.lit { background: var(--accent) !important; }
+header{
+  text-align:center;
+  margin-bottom:20px;
+}
 
-.section-label { font-size: 0.6rem; color: var(--muted); margin: 20px 0 10px; text-transform: uppercase; letter-spacing: 0.12em; display: flex; align-items: center; gap: 10px; }
-.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+h1{
+  font-family:'Playfair Display', serif;
+  color:var(--accent);
+  font-size:2rem;
+  margin-bottom:6px;
+}
 
-.chord-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
-.chord-btn { background: var(--card); border: 1px solid var(--border); padding: 12px 2px; border-radius: 6px; text-align: center; cursor: pointer; transition: 0.1s; }
-.chord-btn:active { transform: scale(0.95); border-color: var(--accent); }
-.btn-name { font-family: 'Playfair Display', serif; font-weight: 700; color: var(--accent); font-size: 1rem; }
+.sub{
+  color:var(--muted);
+  font-size:.75rem;
+  letter-spacing:.08em;
+}
 
-.apikey-row, .search-row { display: flex; gap: 8px; margin-bottom: 10px; }
-input { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 10px; color: #fff; font-family: inherit; }
-button { padding: 10px 16px; border-radius: 6px; border: none; cursor: pointer; font-family: inherit; font-weight: bold; }
-.btn-primary { background: var(--accent); color: #111; }
-.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+#visualizer{
+  width:100%;
+  height:70px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  position:relative;
+  margin-bottom:18px;
+}
 
-.result-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; display: none; margin-top: 10px; }
-.chord-chip { display: inline-block; padding: 4px 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin: 2px; font-size: 0.8rem; }
-.active-chip { border-color: var(--accent); color: var(--accent); }
+#vis-canvas{
+  width:100%;
+  height:100%;
+}
+
+.chord-label{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Playfair Display', serif;
+  font-size:1.7rem;
+  color:var(--accent);
+  opacity:0;
+  transition:opacity .25s;
+  pointer-events:none;
+}
+
+.keyboard-wrap{
+  overflow-x:auto;
+  background:#111;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:22px;
+  scrollbar-width:none;
+}
+
+.keyboard-wrap::-webkit-scrollbar{
+  display:none;
+}
+
+#keyboard{
+  position:relative;
+  width:max-content;
+  height:170px;
+  margin:auto;
+}
+
+.key{
+  position:absolute;
+  border-radius:0 0 6px 6px;
+  cursor:pointer;
+  transition:.08s;
+  user-select:none;
+}
+
+.white{
+  width:42px;
+  height:170px;
+  background:#f2f2f2;
+  border:1px solid #999;
+  z-index:1;
+}
+
+.black{
+  width:26px;
+  height:104px;
+  background:#1d1d1d;
+  border:1px solid #000;
+  z-index:2;
+}
+
+.key.lit{
+  background:var(--accent) !important;
+}
+
+.section-label{
+  margin:22px 0 12px;
+  font-size:.72rem;
+  color:var(--muted);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.section-label::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--border);
+}
+
+.chord-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.chord-btn{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:14px 6px;
+  text-align:center;
+  cursor:pointer;
+  transition:.08s;
+}
+
+.chord-btn:hover{
+  border-color:var(--accent);
+}
+
+.chord-btn:active{
+  transform:scale(.96);
+}
+
+.btn-name{
+  font-family:'Playfair Display', serif;
+  font-size:1rem;
+  color:var(--accent);
+  font-weight:700;
+}
+
+.footer{
+  margin-top:26px;
+  text-align:center;
+  font-size:.72rem;
+  color:var(--muted);
+}
+
+@media(max-width:560px){
+  .chord-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
 </style>
 </head>
+
 <body>
 
 <div class="main-col">
-  <header>
-    <h1>Chord Piano</h1>
-  </header>
 
-  <div id="visualizer">
-    <canvas id="vis-canvas"></canvas>
-    <div class="chord-label" id="chord-label"></div>
-  </div>
+<header>
+  <h1>Chord Piano</h1>
+  <div class="sub">Improved Voicing & Safer Audio Engine</div>
+</header>
 
-  <div class="keyboard-wrap">
-    <div id="keyboard"></div>
-  </div>
+<div id="visualizer">
+  <canvas id="vis-canvas"></canvas>
+  <div class="chord-label" id="chord-label"></div>
+</div>
 
-  <div class="section-label">API Key & Search</div>
-  <div class="apikey-row">
-    <input type="password" id="apikey-input" placeholder="Gemini API Key...">
-    <button class="btn-secondary" id="apikey-save">SET</button>
-  </div>
-  <div class="search-row">
-    <input type="text" id="search-input" placeholder="曲名を検索..." disabled>
-    <button class="btn-primary" id="search-btn" disabled>SEARCH</button>
-  </div>
+<div class="keyboard-wrap">
+  <div id="keyboard"></div>
+</div>
 
-  <div class="result-card" id="result-card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <div id="result-info" style="font-size:0.8rem; font-weight:bold"></div>
-      <div>
-        <button class="btn-primary" id="play-btn" style="padding:4px 8px; font-size:0.6rem;">▶ PLAY</button>
-        <button class="btn-secondary" id="stop-btn" style="padding:4px 8px; font-size:0.6rem;">■</button>
-      </div>
-    </div>
-    <div id="chord-sequence"></div>
-  </div>
+<div id="chord-sections"></div>
 
-  <!-- 全てのコードセクションを復旧 -->
-  <div id="chord-sections"></div>
+<div class="footer">
+  Pure Offline Chord Piano • No API • Secure Local Audio
+</div>
+
 </div>
 
 <script type="module">
-// ════ 音響 ════
-let actx = null, analyser = null;
-function getCtx() {
-  if (!actx) {
-    actx = new (window.AudioContext || window.webkitAudioContext)();
-    analyser = actx.createAnalyser();
-    analyser.connect(actx.destination);
+
+// =========================
+// AUDIO ENGINE
+// =========================
+
+let audioCtx = null;
+let analyser = null;
+const activeNodes = [];
+
+function getAudio(){
+
+  if(!audioCtx){
+
+    audioCtx = new (
+      window.AudioContext ||
+      window.webkitAudioContext
+    )();
+
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.connect(audioCtx.destination);
   }
-  return actx;
+
+  return audioCtx;
 }
 
-function playNote(freq, t, dur = 1.0) {
-  const ac = getCtx();
-  const g = ac.createGain();
-  g.connect(analyser);
-  [1, 2, 3].forEach(harm => {
-    const o = ac.createOscillator();
-    o.type = 'sine'; o.frequency.value = freq * harm;
-    const hg = ac.createGain(); hg.gain.value = 0.25 / harm;
-    o.connect(hg); hg.connect(g);
-    o.start(t); o.stop(t + dur);
+function midiToFreq(m){
+  return 440 * Math.pow(2, (m - 69) / 12);
+}
+
+function stopAllSounds(){
+
+  activeNodes.forEach(node => {
+
+    try{
+      node.stop();
+    }catch(e){}
+
+    try{
+      node.disconnect();
+    }catch(e){}
+
   });
-  g.gain.setValueAtTime(0, t);
-  g.gain.linearRampToValueAtTime(0.3, t + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+  activeNodes.length = 0;
 }
 
-// ════ 高さ調整ロジック ════
-const NOTE_MAP = {'C':60,'C#':61,'Db':61,'D':62,'D#':63,'Eb':63,'E':64,'F':65,'F#':66,'Gb':66,'G':67,'G#':68,'Ab':68,'A':69,'A#':70,'Bb':70,'B':71};
+function playVoice(midi, time, duration = 1.6, velocity = 0.18){
 
-function getBalancedMidi(chordName) {
-  let root = null, name = chordName.trim();
-  const two = name.slice(0, 2);
-  if (NOTE_MAP[two]) { root = NOTE_MAP[two]; name = name.slice(2); }
-  else if (NOTE_MAP[name[0]]) { root = NOTE_MAP[name[0]]; name = name.slice(1); }
-  if (root === null) return null;
+  const ac = getAudio();
 
-  let base = root;
-  while (base > 59) base -= 12; // C4以上はオクターブ下げる
-  while (base < 48) base += 12;
+  const master = ac.createGain();
+  master.connect(analyser);
 
-  let intervals = [0, 4, 7];
-  const low = name.toLowerCase();
-  if (low.includes('m7')) intervals = [0, 3, 7, 10];
-  else if (low.includes('m') || low.includes('min')) intervals = [0, 3, 7];
-  else if (low.includes('maj7')) intervals = [0, 4, 7, 11];
-  else if (low.includes('7')) intervals = [0, 4, 7, 10];
-  else if (low.includes('sus4')) intervals = [0, 5, 7];
-  else if (low.includes('dim')) intervals = [0, 3, 6];
+  // smoother piano-ish envelope
+  master.gain.setValueAtTime(0, time);
+  master.gain.linearRampToValueAtTime(velocity, time + 0.02);
+  master.gain.exponentialRampToValueAtTime(0.0001, time + duration);
 
-  return intervals.map(i => base + i);
-}
+  // harmonic stack
+  const harmonics = [
+    {mul:1, gain:1.0},
+    {mul:2, gain:0.22},
+    {mul:3, gain:0.10},
+    {mul:4, gain:0.04}
+  ];
 
-// ════ キーボード ════
-const keyEls = {};
-function initKeyboard() {
-  const kb = document.getElementById('keyboard');
-  const whites = [0,2,4,5,7,9,11];
-  let wIdx = 0;
-  for (let m = 48; m <= 71; m++) {
-    const isW = whites.includes(m % 12);
-    const el = document.createElement('div');
-    el.className = `key ${isW ? 'white' : 'black'}`;
-    if (isW) { el.style.left = (wIdx++ * 35) + 'px'; }
-    else { el.style.left = (wIdx * 35 - 12) + 'px'; }
-    el.onmousedown = () => {
-      playNote(440 * Math.pow(2, (m - 69) / 12), getCtx().currentTime);
-      el.classList.add('lit'); setTimeout(() => el.classList.remove('lit'), 200);
+  harmonics.forEach(h => {
+
+    const osc = ac.createOscillator();
+    osc.type = 'sine';
+
+    osc.frequency.value = midiToFreq(midi) * h.mul;
+
+    const g = ac.createGain();
+    g.gain.value = velocity * h.gain;
+
+    osc.connect(g);
+    g.connect(master);
+
+    osc.start(time);
+    osc.stop(time + duration);
+
+    osc.onended = () => {
+
+      try{ osc.disconnect(); }catch(e){}
+      try{ g.disconnect(); }catch(e){}
+
     };
-    keyEls[m] = el; kb.appendChild(el);
-  }
-}
-initKeyboard();
 
-// ════ 全コード復旧 (34個) ════
-const SECTIONS = [
-  { label: 'Basic Chords', chords: ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim'] },
-  { label: 'Accidentals', chords: ['C#', 'Eb', 'F#', 'Ab', 'Bb'] },
-  { label: 'Minor Variations', chords: ['Cm', 'D#m', 'Fm', 'G#m', 'Bbm', 'Bm'] },
-  { label: '7th / Maj7', chords: ['C7', 'Cmaj7', 'D7', 'E7', 'Fmaj7', 'G7', 'A7', 'Am7'] },
-  { label: 'Others', chords: ['Csus4', 'Gsus4', 'D#', 'F#m', 'C#m', 'E', 'A', 'D'] }
-];
+    activeNodes.push(osc);
 
-const sectionsEl = document.getElementById('chord-sections');
-SECTIONS.forEach(sec => {
-  const lbl = document.createElement('div');
-  lbl.className = 'section-label'; lbl.textContent = sec.label;
-  sectionsEl.appendChild(lbl);
-  const grid = document.createElement('div');
-  grid.className = 'chord-grid';
-  sec.chords.forEach(name => {
-    const btn = document.createElement('div');
-    btn.className = 'chord-btn';
-    btn.innerHTML = `<span class="btn-name">${name}</span>`;
-    btn.onclick = () => playChord(name);
-    grid.appendChild(btn);
   });
-  sectionsEl.appendChild(grid);
-});
 
-function playChord(name) {
-  const midi = getBalancedMidi(name);
-  if (!midi) return;
-  const now = getCtx().currentTime;
-  midi.forEach((m, i) => {
-    playNote(440 * Math.pow(2, (m - 69) / 12), now + i * 0.015);
-    if (keyEls[m]) {
-      keyEls[m].classList.add('lit');
-      setTimeout(() => keyEls[m].classList.remove('lit'), 400);
-    }
-  });
-  const label = document.getElementById('chord-label');
-  label.textContent = name; label.style.opacity = 1;
-  setTimeout(() => label.style.opacity = 0, 1000);
+  setTimeout(() => {
+
+    try{
+      master.disconnect();
+    }catch(e){}
+
+  }, (duration * 1000) + 120);
 }
 
-// ════ 検索ロジック ════
-let apiKey = '', sequence = [], timer = null, step = 0;
-document.getElementById('apikey-save').onclick = () => {
-  apiKey = document.getElementById('apikey-input').value.trim();
-  if (apiKey) {
-    document.getElementById('search-input').disabled = false;
-    document.getElementById('search-btn').disabled = false;
-    document.getElementById('apikey-save').textContent = 'OK';
-  }
+// =========================
+// MUSIC THEORY
+// =========================
+
+const ROOTS = {
+  'C':60,
+  'C#':61,
+  'Db':61,
+  'D':62,
+  'D#':63,
+  'Eb':63,
+  'E':64,
+  'F':65,
+  'F#':66,
+  'Gb':66,
+  'G':67,
+  'G#':68,
+  'Ab':68,
+  'A':69,
+  'A#':70,
+  'Bb':70,
+  'B':71
 };
 
-async function search() {
-  const q = document.getElementById('search-input').value;
-  if (!q || !apiKey) return;
-  document.getElementById('search-btn').textContent = '...';
-  try {
-    const { GoogleGenerativeAI } = await import('https://esm.run/@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const prompt = `Return JSON for song "${q}": {"title":"","artist":"","chords":["C","G","Am","F"]}`;
-    const result = await model.generateContent(prompt);
-    const data = JSON.parse(result.response.text().match(/\{.*\}/s)[0]);
-    sequence = data.chords;
-    document.getElementById('result-info').textContent = `${data.title} / ${data.artist}`;
-    const seqEl = document.getElementById('chord-sequence');
-    seqEl.innerHTML = sequence.map(c => `<span class="chord-chip">${c}</span>`).join('');
-    document.getElementById('result-card').style.display = 'block';
-    startAuto();
-  } catch (e) { alert("Error"); }
-  document.getElementById('search-btn').textContent = 'SEARCH';
+// proper voicings
+function buildChord(name){
+
+  let chord = name.trim();
+
+  let rootName = null;
+
+  const two = chord.slice(0,2);
+
+  if(ROOTS[two] !== undefined){
+
+    rootName = two;
+    chord = chord.slice(2);
+
+  }else if(ROOTS[chord[0]] !== undefined){
+
+    rootName = chord[0];
+    chord = chord.slice(1);
+  }
+
+  if(!rootName) return null;
+
+  let root = ROOTS[rootName];
+
+  while(root > 59) root -= 12;
+  while(root < 48) root += 12;
+
+  const low = chord.toLowerCase();
+
+  let intervals;
+
+  // detection order matters
+
+  if(low.includes('maj7')){
+
+    intervals = [0,7,11,16];
+
+  }else if(low.includes('m7b5')){
+
+    intervals = [0,3,6,10];
+
+  }else if(low.includes('dim7')){
+
+    intervals = [0,3,6,9];
+
+  }else if(low.includes('m7')){
+
+    intervals = [0,7,10,15];
+
+  }else if(low.includes('7')){
+
+    intervals = [0,10,16,19];
+
+  }else if(low.includes('sus4')){
+
+    intervals = [0,7,12,17];
+
+  }else if(low.includes('dim')){
+
+    intervals = [0,3,6,15];
+
+  }else if(low.includes('aug')){
+
+    intervals = [0,4,8,16];
+
+  }else if(
+    low.includes('min') ||
+    /^m(?!aj)/.test(low)
+  ){
+
+    intervals = [0,7,15];
+
+  }else{
+
+    intervals = [0,7,16];
+  }
+
+  return intervals.map(i => root + i);
 }
 
-function startAuto() {
-  stopAuto();
-  const loop = () => {
-    const idx = step % sequence.length;
-    playChord(sequence[idx]);
-    document.querySelectorAll('.chord-chip').forEach((c, i) => c.classList.toggle('active-chip', i === idx));
-    step++; timer = setTimeout(loop, 2000);
+// =========================
+// KEYBOARD
+// =========================
+
+const keyEls = {};
+
+function initKeyboard(){
+
+  const kb = document.getElementById('keyboard');
+
+  const whiteMap = [0,2,4,5,7,9,11];
+  const blackOffsets = {
+    1:-13,
+    3:-13,
+    6:-13,
+    8:-13,
+    10:-13
   };
-  loop();
+
+  let whiteIndex = 0;
+
+  for(let midi=48; midi<=83; midi++){
+
+    const pc = midi % 12;
+    const isWhite = whiteMap.includes(pc);
+
+    const el = document.createElement('div');
+
+    el.className = `key ${isWhite ? 'white' : 'black'}`;
+
+    if(isWhite){
+
+      el.style.left = (whiteIndex * 42) + 'px';
+      whiteIndex++;
+
+    }else{
+
+      el.style.left =
+        ((whiteIndex * 42) + blackOffsets[pc]) + 'px';
+    }
+
+    el.onmousedown = () => {
+
+      playVoice(midi, getAudio().currentTime, 1.4, 0.22);
+
+      el.classList.add('lit');
+
+      setTimeout(() => {
+        el.classList.remove('lit');
+      }, 240);
+    };
+
+    keyEls[midi] = el;
+    kb.appendChild(el);
+  }
 }
-function stopAuto() { clearTimeout(timer); step = 0; }
 
-document.getElementById('search-btn').onclick = search;
-document.getElementById('play-btn').onclick = startAuto;
-document.getElementById('stop-btn').onclick = stopAuto;
+initKeyboard();
 
-const canvas = document.getElementById('vis-canvas');
-const vc = canvas.getContext('2d');
-function draw() {
-  requestAnimationFrame(draw);
-  const w = canvas.width = canvas.offsetWidth, h = canvas.height = canvas.offsetHeight;
-  vc.clearRect(0,0,w,h);
-  if (!analyser) return;
-  const data = new Uint8Array(analyser.frequencyBinCount);
-  analyser.getByteTimeDomainData(data);
-  vc.beginPath(); vc.strokeStyle = '#c8a96e'; vc.lineWidth = 2;
-  data.forEach((v, i) => {
-    const x = (i / data.length) * w, y = (v / 128) * (h / 2);
-    i === 0 ? vc.moveTo(x, y) : vc.lineTo(x, y);
+// =========================
+// CHORD BUTTONS
+// =========================
+
+const SECTIONS = [
+
+{
+  label:'Basic',
+  chords:[
+    'C','Dm','Em','F',
+    'G','Am','Bdim'
+  ]
+},
+
+{
+  label:'Minor',
+  chords:[
+    'Cm','Dm','Em','Fm',
+    'Gm','Am','Bm'
+  ]
+},
+
+{
+  label:'7th',
+  chords:[
+    'C7','D7','E7','F7',
+    'G7','A7','B7'
+  ]
+},
+
+{
+  label:'Maj7',
+  chords:[
+    'Cmaj7','Dmaj7','Emaj7',
+    'Fmaj7','Gmaj7','Amaj7'
+  ]
+},
+
+{
+  label:'Extended',
+  chords:[
+    'Am7','Dm7','Em7',
+    'Gsus4','Csus4','F#m',
+    'Bb','Eb'
+  ]
+}
+
+];
+
+const sectionsEl =
+document.getElementById('chord-sections');
+
+SECTIONS.forEach(sec => {
+
+  const label = document.createElement('div');
+  label.className = 'section-label';
+  label.textContent = sec.label;
+
+  sectionsEl.appendChild(label);
+
+  const grid = document.createElement('div');
+  grid.className = 'chord-grid';
+
+  sec.chords.forEach(chord => {
+
+    const btn = document.createElement('div');
+    btn.className = 'chord-btn';
+
+    btn.innerHTML =
+      `<span class="btn-name">${chord}</span>`;
+
+    btn.onclick = () => playChord(chord);
+
+    grid.appendChild(btn);
   });
-  vc.stroke();
+
+  sectionsEl.appendChild(grid);
+
+});
+
+// =========================
+// PLAY CHORD
+// =========================
+
+function playChord(name){
+
+  const notes = buildChord(name);
+
+  if(!notes) return;
+
+  const now = getAudio().currentTime;
+
+  notes.forEach((midi, index) => {
+
+    playVoice(
+      midi,
+      now + (index * 0.018),
+      1.8,
+      0.17
+    );
+
+    if(keyEls[midi]){
+
+      keyEls[midi].classList.add('lit');
+
+      setTimeout(() => {
+
+        keyEls[midi].classList.remove('lit');
+
+      }, 500);
+    }
+
+  });
+
+  const label =
+    document.getElementById('chord-label');
+
+  label.textContent = name;
+  label.style.opacity = 1;
+
+  setTimeout(() => {
+    label.style.opacity = 0;
+  }, 900);
 }
+
+// =========================
+// VISUALIZER
+// =========================
+
+const canvas =
+document.getElementById('vis-canvas');
+
+const ctx = canvas.getContext('2d');
+
+function draw(){
+
+  requestAnimationFrame(draw);
+
+  const w = canvas.width = canvas.offsetWidth;
+  const h = canvas.height = canvas.offsetHeight;
+
+  ctx.clearRect(0,0,w,h);
+
+  if(!analyser) return;
+
+  const data =
+    new Uint8Array(analyser.frequencyBinCount);
+
+  analyser.getByteTimeDomainData(data);
+
+  ctx.beginPath();
+
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#c8a96e';
+
+  data.forEach((v,i) => {
+
+    const x = (i / data.length) * w;
+
+    const y =
+      ((v - 128) / 128) * (h / 2) + (h / 2);
+
+    if(i === 0){
+      ctx.moveTo(x,y);
+    }else{
+      ctx.lineTo(x,y);
+    }
+
+  });
+
+  ctx.stroke();
+}
+
 draw();
+
+// =========================
+// SAFETY
+// =========================
+
+window.addEventListener('beforeunload', () => {
+  stopAllSounds();
+});
+
 </script>
+
 </body>
 </html>
