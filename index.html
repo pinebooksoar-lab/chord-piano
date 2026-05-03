@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Chord Piano - Perfect Balance</title>
+<title>Chord Piano - Full Palette</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400&display=swap');
 
@@ -28,7 +28,7 @@ h1 { font-family: 'Playfair Display', serif; color: var(--accent); font-size: 2.
 /* ── Visualizer ── */
 #visualizer { width: 100%; height: 60px; margin-bottom: 16px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); position: relative; overflow: hidden; }
 #vis-canvas { width: 100%; height: 100%; }
-.chord-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--accent); opacity: 0; transition: opacity 0.3s; text-shadow: 0 0 15px rgba(200,169,110,0.5); }
+.chord-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--accent); opacity: 0; transition: opacity 0.3s; text-shadow: 0 0 15px rgba(200,169,110,0.5); pointer-events: none; }
 
 /* ── Keyboard ── */
 .keyboard-wrap { width: 100%; overflow-x: auto; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border); background: #111; padding: 10px 10px 0; scrollbar-width: none; }
@@ -38,24 +38,26 @@ h1 { font-family: 'Playfair Display', serif; color: var(--accent); font-size: 2.
 .key.black { background: #222; width: 22px; height: 66px; z-index: 2; border: 1px solid #000; }
 .key.lit { background: var(--accent) !important; }
 
-/* ── UI Elements ── */
-.section-label { font-size: 0.6rem; color: var(--muted); margin: 15px 0 8px; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 10px; }
+/* ── Section UI ── */
+.section-label { font-size: 0.6rem; color: var(--muted); margin: 20px 0 10px; text-transform: uppercase; letter-spacing: 0.12em; display: flex; align-items: center; gap: 10px; }
 .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .apikey-row, .search-row { display: flex; gap: 8px; margin-bottom: 10px; }
-input { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 10px; color: #fff; outline: none; font-family: inherit; }
+input { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 10px; color: #fff; outline: none; font-family: inherit; font-size: 0.8rem; }
 button { padding: 10px 16px; border-radius: 6px; border: none; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s; }
 .btn-primary { background: var(--accent); color: #111; }
 .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
 
 /* ── Chord Grid ── */
-.chord-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
-.chord-btn { background: var(--card); border: 1px solid var(--border); padding: 12px 0; color: var(--accent); border-radius: 8px; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-.chord-btn:active { transform: scale(0.95); }
-.btn-type { font-size: 0.5rem; color: var(--muted); }
+.chord-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 15px; }
+.chord-btn { background: var(--card); border: 1px solid var(--border); padding: 12px 2px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.1s; overflow: hidden; }
+.chord-btn:active { transform: scale(0.94); border-color: var(--accent); }
+.btn-name { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--accent); }
+.btn-type { font-size: 0.45rem; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
 
+/* ── Result Card ── */
 .result-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; display: none; margin-top: 10px; }
-.chord-chip { display: inline-block; padding: 4px 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin: 2px; font-size: 0.8rem; }
-.active-chip { border-color: var(--accent); color: var(--accent); }
+.chord-chip { display: inline-block; padding: 4px 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin: 2px; font-size: 0.75rem; color: var(--muted); }
+.active-chip { border-color: var(--accent); color: var(--accent); background: rgba(200,169,110,0.1); }
 </style>
 </head>
 <body>
@@ -63,7 +65,7 @@ button { padding: 10px 16px; border-radius: 6px; border: none; cursor: pointer; 
 <div class="main-col">
   <header>
     <h1>Chord Piano</h1>
-    <p style="font-size: 0.7rem; color: var(--muted)">和音の高さを最適化した完成版</p>
+    <p style="font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em;">ALL CHORDS BALANCED (C3-B3)</p>
   </header>
 
   <div id="visualizer">
@@ -75,31 +77,30 @@ button { padding: 10px 16px; border-radius: 6px; border: none; cursor: pointer; 
     <div id="keyboard"></div>
   </div>
 
-  <div class="section-label">API KEY</div>
+  <!-- Search Area -->
+  <div class="section-label">API Key & Search</div>
   <div class="apikey-row">
     <input type="password" id="apikey-input" placeholder="Gemini API Key...">
     <button class="btn-secondary" id="apikey-save">SET</button>
   </div>
-
-  <div class="section-label">SONG SEARCH</div>
   <div class="search-row">
-    <input type="text" id="search-input" placeholder="曲名を入力..." disabled>
-    <button class="btn-primary" id="search-btn" disabled>検索</button>
+    <input type="text" id="search-input" placeholder="曲名を検索..." disabled>
+    <button class="btn-primary" id="search-btn" disabled>SEARCH</button>
   </div>
 
   <div class="result-card" id="result-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <div id="result-info"></div>
+      <div id="result-info" style="font-size:0.8rem; font-weight:bold"></div>
       <div>
-        <button class="btn-primary" id="play-btn" style="padding:5px 10px; font-size:0.7rem;">▶ PLAY</button>
-        <button class="btn-secondary" id="stop-btn" style="padding:5px 10px; font-size:0.7rem;">■</button>
+        <button class="btn-primary" id="play-btn" style="padding:4px 8px; font-size:0.6rem;">▶ PLAY</button>
+        <button class="btn-secondary" id="stop-btn" style="padding:4px 8px; font-size:0.6rem;">■</button>
       </div>
     </div>
     <div id="chord-sequence"></div>
   </div>
 
-  <div class="section-label">PRESET CHORDS</div>
-  <div id="chord-presets" class="chord-grid"></div>
+  <!-- Full Chord Sections -->
+  <div id="chord-sections"></div>
 </div>
 
 <script type="module">
@@ -121,7 +122,7 @@ function playNote(freq, t, dur = 1.0) {
   [1, 2, 3].forEach(harm => {
     const o = ac.createOscillator();
     o.type = 'sine'; o.frequency.value = freq * harm;
-    const hg = ac.createGain(); hg.gain.value = 0.3 / harm;
+    const hg = ac.createGain(); hg.gain.value = 0.25 / harm;
     o.connect(hg); hg.connect(g);
     o.start(t); o.stop(t + dur);
   });
@@ -130,7 +131,7 @@ function playNote(freq, t, dur = 1.0) {
   g.gain.exponentialRampToValueAtTime(0.001, t + dur);
 }
 
-// ════════════ コード解析ロジック（高さ調整） ════════════
+// ════════════ コード解析ロジック（常にバランス調整） ════════════
 const NOTE_MAP = {'C':60,'C#':61,'Db':61,'D':62,'D#':63,'Eb':63,'E':64,'F':65,'F#':66,'Gb':66,'G':67,'G#':68,'Ab':68,'A':69,'A#':70,'Bb':70,'B':71};
 
 function getBalancedMidi(chordName) {
@@ -140,7 +141,7 @@ function getBalancedMidi(chordName) {
   else if (NOTE_MAP[name[0]]) { root = NOTE_MAP[name[0]]; name = name.slice(1); }
   if (root === null) return null;
 
-  // 【直感通り】ルートがC4(60)以上ならオクターブ下(48〜59)へ移動
+  // 【直感通り】ルートがC4(60)以上なら、オクターブ下げる(48〜59の範囲)
   let base = root;
   while (base > 59) base -= 12;
   while (base < 48) base += 12;
@@ -151,6 +152,7 @@ function getBalancedMidi(chordName) {
   else if (lowName.includes('m') || lowName.includes('min')) intervals = [0, 3, 7];
   else if (lowName.includes('maj7')) intervals = [0, 4, 7, 11];
   else if (lowName.includes('7')) intervals = [0, 4, 7, 10];
+  else if (lowName.includes('sus4')) intervals = [0, 5, 7];
   else if (lowName.includes('dim')) intervals = [0, 3, 6];
 
   return intervals.map(i => base + i);
@@ -169,25 +171,38 @@ function initKeyboard() {
     if (isW) { el.style.left = (wIdx++ * 35) + 'px'; }
     else { el.style.left = (wIdx * 35 - 12) + 'px'; }
     el.onmousedown = () => {
-      const f = 440 * Math.pow(2, (m - 69) / 12);
-      playNote(f, getCtx().currentTime);
+      playNote(440 * Math.pow(2, (m - 69) / 12), getCtx().currentTime);
       el.classList.add('lit'); setTimeout(() => el.classList.remove('lit'), 200);
     };
-    keyEls[m] = el;
-    kb.appendChild(el);
+    keyEls[m] = el; kb.appendChild(el);
   }
+  kb.style.width = (wIdx * 35) + 'px';
 }
 initKeyboard();
 
-// ════════════ プリセットボタン ════════════
-const PRESETS = ["C", "Dm", "Em", "F", "G", "Am", "Bdim", "B♭", "C7", "Fmaj7", "G7", "A7"];
-const presetWrap = document.getElementById('chord-presets');
-PRESETS.forEach(name => {
-  const btn = document.createElement('div');
-  btn.className = 'chord-btn';
-  btn.innerHTML = `<span style="font-weight:bold">${name}</span>`;
-  btn.onclick = () => playChord(name);
-  presetWrap.appendChild(btn);
+// ════════════ コードボタンの復活 (32種類) ════════════
+const SECTIONS = [
+  { label:'定番コード', chords:['C','G','Am','F','Em','Dm','E','A','D','Bm','B♭','Gm'] },
+  { label:'セブンス', chords:['G7','C7','Cmaj7','Am7','Fmaj7','Em7','Dm7','E7'] },
+  { label:'その他・渋め', chords:['E♭','Cm','Fm','F#m','D7','B7','A7','Bdim','Gsus4','Dsus4','C#m','A♭'] }
+];
+
+const sectionsEl = document.getElementById('chord-sections');
+SECTIONS.forEach(sec => {
+  const lbl = document.createElement('div');
+  lbl.className = 'section-label'; lbl.textContent = sec.label;
+  sectionsEl.appendChild(lbl);
+
+  const grid = document.createElement('div');
+  grid.className = 'chord-grid';
+  sec.chords.forEach(name => {
+    const btn = document.createElement('div');
+    btn.className = 'chord-btn';
+    btn.innerHTML = `<span class="btn-name">${name}</span>`;
+    btn.onclick = () => playChord(name);
+    grid.appendChild(btn);
+  });
+  sectionsEl.appendChild(grid);
 });
 
 function playChord(name) {
@@ -195,7 +210,7 @@ function playChord(name) {
   if (!midi) return;
   const now = getCtx().currentTime;
   midi.forEach((m, i) => {
-    playNote(440 * Math.pow(2, (m - 69) / 12), now + i * 0.01);
+    playNote(440 * Math.pow(2, (m - 69) / 12), now + i * 0.015);
     if (keyEls[m]) {
       keyEls[m].classList.add('lit');
       setTimeout(() => keyEls[m].classList.remove('lit'), 400);
@@ -203,10 +218,10 @@ function playChord(name) {
   });
   const label = document.getElementById('chord-label');
   label.textContent = name; label.style.opacity = 1;
-  setTimeout(() => label.style.opacity = 0, 800);
+  setTimeout(() => label.style.opacity = 0, 1000);
 }
 
-// ════════════ AI 検索 & 自動再生 ════════════
+// ════════════ AI 検索 & 再生 ════════════
 let apiKey = '', sequence = [], timer = null, step = 0;
 
 document.getElementById('apikey-save').onclick = () => {
@@ -226,18 +241,17 @@ async function search() {
     const { GoogleGenerativeAI } = await import('https://esm.run/@google/generative-ai');
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const prompt = `曲名 "${q}" のコード進行(4-8個)をJSONで返せ。形式: {"title":"","artist":"","chords":["C","G","Am","F"]}`;
+    const prompt = `Return ONLY JSON for song "${q}": {"title":"","artist":"","chords":["C","G","Am","F"]}`;
     const result = await model.generateContent(prompt);
     const data = JSON.parse(result.response.text().match(/\{.*\}/s)[0]);
-    
     sequence = data.chords;
     document.getElementById('result-info').textContent = `${data.title} / ${data.artist}`;
     const seqEl = document.getElementById('chord-sequence');
     seqEl.innerHTML = sequence.map(c => `<span class="chord-chip">${c}</span>`).join('');
     document.getElementById('result-card').style.display = 'block';
     startAuto();
-  } catch (e) { alert("エラー: キーが正しいか確認してください"); }
-  document.getElementById('search-btn').textContent = '検索';
+  } catch (e) { alert("APIキーが無効、またはエラーが発生しました。"); }
+  document.getElementById('search-btn').textContent = 'SEARCH';
 }
 
 function startAuto() {
