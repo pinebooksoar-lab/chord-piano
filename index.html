@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Chord Piano - Balanced</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400&display=swap');
+
+:root {
+  --bg: #0e0e12;
+  --surface: #16161e;
+  --card: #1e1e2a;
+  --border: #2a2a3a;
+  --accent: #c8a96e;
+  --accent2: #7eb8c8;
+  --minor: #a87eb8;
+  --dim: #b86e7e;
+  --text: #e8e4dc;
+  --muted: #6e6a62;
+  --danger: #c86e6e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 12px 48px;
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(200,169,110,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 30% at 85% 100%, rgba(126,184,200,0.05) 0%, transparent 70%);
+  overflow-x: hidden;
+}
+
+header { text-align: center; margin-bottom: 24px; }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 5vw, 2.8rem);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+
+.subtitle {
+  margin-top: 6px;
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.main-col {
+  width: 100%;
+  max-width: 600px;
+}
+
+/* ── Visualizer ── */
+#visualizer {
+  width: 100%;
+  height: 58px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+#vis-canvas { width: 100%; height: 100%; display: block; }
+
+.chord-label {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  text-shadow: 0 0 18px rgba(200,169,110,0.6);
+  white-space: nowrap;
+}
+
+/* ── Keyboard ── */
+.keyboard-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #111118;
+  padding: 10px 10px 0;
+  scrollbar-width: none;
+}
+.keyboard-wrap::-webkit-scrollbar { display: none; }
+
+#keyboard {
+  position: relative;
+  height: 110px;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.key {
+  position: absolute;
+  border-radius: 0 0 5px 5px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: background 0.08s;
+}
+.key.white {
+  background: #f0ece4; border: 1px solid #bbb; border-top: none;
+  z-index: 1; width: 34px; height: 110px;
+}
+.key.black {
+  background: #1a1a22; border: 1px solid #000; border-top: none;
+  z-index: 2; width: 20px; height: 66px;
+}
+.key.white.lit { background: #e8d8a0; }
+.key.black.lit { background: #5a4a20; }
+.key-label {
+  position: absolute; bottom: 5px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.46rem; color: #888; pointer-events: none;
+}
+
+/* ── Section label ── */
+.section-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── API Key ── */
+.apikey-area { margin-bottom: 14px; }
+.apikey-row { display: flex; gap: 8px; align-items: center; }
+.apikey-input {
+  flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 9px 12px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.72rem;
+  outline: none; transition: border-color 0.2s; min-width: 0;
+}
+.apikey-save {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 9px 14px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.68rem;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.apikey-save.saved { border-color: #6eb87e; color: #6eb87e; }
+.apikey-status { font-size: 0.62rem; margin-top: 6px; color: var(--muted); }
+.apikey-status.ok { color: #6eb87e; }
+
+/* ── Search Box ── */
+.search-area { margin-bottom: 16px; }
+.search-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.search-input {
+  flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.78rem; outline: none;
+}
+.search-btn {
+  background: var(--accent); border: none; border-radius: 8px; padding: 10px 16px;
+  color: #111; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+}
+.search-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Result card ── */
+.result-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px; margin-bottom: 16px; display: none;
+}
+.result-card.visible { display: block; }
+.result-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.play-btn {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
+  padding: 7px 14px; color: var(--text); cursor: pointer; font-size: 0.68rem;
+}
+.play-btn.active { background: var(--accent); color: #111; }
+.chord-chip {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 10px; font-size: 0.7rem; color: var(--muted); margin-right: 4px; display: inline-block; margin-bottom: 4px;
+}
+.active-chip { border-color: var(--accent); color: var(--accent); background: rgba(200,169,110,0.1); }
+
+/* ── Chord Buttons ── */
+.chord-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 20px; }
+.chord-btn {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 2px; cursor: pointer; display: flex; flex-direction: column; align-items: center;
+  transition: transform 0.1s, border-color 0.2s; position: relative; overflow: hidden;
+}
+.chord-btn.playing-now { transform: scale(0.95); border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+.btn-name { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--accent); }
+.btn-type { font-size: 0.5rem; color: var(--muted); text-transform: uppercase; }
+
+.loading-row { display: none; align-items: center; gap: 10px; font-size: 0.65rem; color: var(--muted); margin-bottom: 10px; }
+.loading-row.visible { display: flex; }
+.error-row { display: none; color: var(--danger); font-size: 0.63rem; margin-bottom: 10px; }
+.error-row.visible { display: block; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Chord Piano</h1>
+  <p class="subtitle">AIがコードを選び、バランスよく奏でる</p>
+</header>
+
+<div class="main-col">
+  <div id="visualizer">
+    <canvas id="vis-canvas"></canvas>
+    <div class="chord-label" id="chord-label"></div>
+  </div>
+
+  <div class="keyboard-wrap">
+    <div id="keyboard"></div>
+  </div>
+
+  <div class="section-label">APIキー設定</div>
+  <div class="apikey-area">
+    <div class="apikey-row">
+      <input type="password" class="apikey-input" id="apikey-input" placeholder="Gemini APIキーを入力">
+      <button class="apikey-save" id="apikey-save">セット</button>
+    </div>
+    <div class="apikey-status" id="apikey-status">⚪ 未設定</div>
+  </div>
+
+  <div class="section-label">曲名で検索</div>
+  <div class="search-area">
+    <div class="search-row">
+      <input type="text" class="search-input" id="search-input" placeholder="まずAPIキーをセットしてください" disabled>
+      <button class="search-btn" id="search-btn" disabled>検索</button>
+    </div>
+    <div class="loading-row" id="loading-row"><div class="spinner"></div><span>AIが解析中...</span></div>
+    <div class="error-row" id="error-row"></div>
+
+    <div class="result-card" id="result-card">
+      <div class="result-header">
+        <div>
+          <div class="result-title" id="result-title" style="font-weight:bold"></div>
+          <div class="result-meta" id="result-meta" style="font-size:0.6rem; color:var(--muted)"></div>
+        </div>
+        <div class="result-actions">
+          <button class="play-btn" id="play-btn">▶ 再生</button>
+          <button class="play-btn" id="stop-btn">■</button>
+        </div>
+      </div>
+      <div class="chord-sequence" id="chord-sequence"></div>
+      <div style="font-size:0.6rem; color:var(--muted); margin-top:8px">
+        テンポ: <input type="range" id="tempo-slider" min="40" max="140" value="80"> <span id="tempo-val">80</span> BPM
+      </div>
+    </div>
+  </div>
+
+  <div id="chord-sections"></div>
+</div>
+
+<script type="module">
+// ════════════ Audio Engine ════════════
+let actx = null, analyser = null;
+
+function getCtx() {
+  if (!actx) {
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = actx.createAnalyser();
+    analyser.connect(actx.destination);
+  }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+
+function playNote(freq, t, dur = 1.2) {
+  const ac = getCtx();
+  const g = ac.createGain();
+  g.connect(analyser);
+  // 倍音成分を追加してピアノらしく
+  [[1,.5],[2,.2],[3,.1]].forEach(([r,v]) => {
+    const o = ac.createOscillator();
+    o.type = 'sine'; o.frequency.value = freq * r;
+    const hg = ac.createGain(); hg.gain.value = v;
+    o.connect(hg); hg.connect(g);
+    o.start(t); o.stop(t + dur + 0.1);
+  });
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.4, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+}
+
+const NOTE_MAP = {'C':60,'C#':61,'Db':61,'D':62,'D#':63,'Eb':63,'E':64,'F':65,'F#':66,'Gb':66,'G':67,'G#':68,'Ab':68,'A':69,'A#':70,'Bb':70,'B':71};
+
+function parseChordToMidi(chordName) {
+  const raw = chordName.trim();
+  let root = null, rest = '';
+  const two = raw.slice(0, 2);
+  if (NOTE_MAP[two] !== undefined) { root = NOTE_MAP[two]; rest = raw.slice(2); }
+  else if (NOTE_MAP[raw[0]] !== undefined) { root = NOTE_MAP[raw[0]]; rest = raw.slice(1); }
+  if (root === null) return null;
+
+  // ルート音を中央付近(MIDI 48-59)に配置
+  let base = root;
+  while (base > 59) base -= 12;
+  while (base < 48) base += 12;
+
+  const r = rest.toLowerCase();
+  let intervals = [0, 4, 7]; // Default Major
+  if (r.includes('m7')) intervals = [0,3,7,10];
+  else if (r.startsWith('m') || r.includes('min')) intervals = [0,3,7];
+  else if (r.includes('maj7')) intervals = [0,4,7,11];
+  else if (r.includes('7')) intervals = [0,4,7,10];
+  else if (r.includes('dim')) intervals = [0,3,6];
+
+  // 【重要】滑らかな響き（転回形）にするための処理
+  const rawNotes = intervals.map(i => base + i);
+  const adjustedNotes = rawNotes.map((note, idx) => {
+    if (idx === 0) return note; // ベース音は固定
+    let n = note;
+    while (n > 71) n -= 12; // 鍵盤の右端(B4)を超えたら1オクターブ下げる
+    return n;
+  });
+
+  return [...new Set(adjustedNotes)].sort((a, b) => a - b);
+}
+
+// ════════════ Keyboard UI ════════════
+const keyEls = {};
+function buildKeyboard() {
+  const kb = document.getElementById('keyboard');
+  const whiteSemis = [0,2,4,5,7,9,11];
+  let whiteIdx = 0;
+  for (let m = 48; m <= 71; m++) {
+    const isWhite = whiteSemis.includes(m % 12);
+    const el = document.createElement('div');
+    el.className = `key ${isWhite ? 'white' : 'black'}`;
+    if (isWhite) {
+      el.style.left = (whiteIdx * 35) + 'px';
+      whiteIdx++;
+    } else {
+      el.style.left = (whiteIdx * 35 - 11) + 'px';
+    }
+    el.addEventListener('pointerdown', () => {
+      playNote(440 * Math.pow(2, (m - 69) / 12), getCtx().currentTime);
+      el.classList.add('lit'); setTimeout(() => el.classList.remove('lit'), 300);
+    });
+    keyEls[m] = el;
+    kb.appendChild(el);
+  }
+  kb.style.width = (whiteIdx * 35) + 'px';
+}
+buildKeyboard();
+
+// ════════════ Search & Logic ════════════
+let apiKey = '', currentSequence = [], autoTimer = null, autoStep = 0;
+
+document.getElementById('apikey-save').addEventListener('click', () => {
+  apiKey = document.getElementById('apikey-input').value.trim();
+  if (apiKey) {
+    document.getElementById('apikey-status').textContent = '✅ セット完了';
+    document.getElementById('search-input').disabled = false;
+    document.getElementById('search-btn').disabled = false;
+    document.getElementById('search-input').placeholder = '曲名を入力...';
+  }
+});
+
+async function doSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  if (!q || !apiKey) return;
+  
+  const loading = document.getElementById('loading-row');
+  loading.classList.add('visible');
+  
+  try {
+    const { GoogleGenerativeAI } = await import('https://esm.run/@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const prompt = `Return JSON ONLY for song "${q}": {"title":"","artist":"","key":"","bpm":80,"chords":["C","G","Am","F"]}`;
+    const result = await model.generateContent(prompt);
+    const data = JSON.parse(result.response.text().match(/\{.*\}/s)[0]);
+    
+    currentSequence = data.chords.map(name => ({ name, midi: parseChordToMidi(name) }));
+    
+    document.getElementById('result-title').textContent = data.title;
+    document.getElementById('result-meta').textContent = `${data.artist} / ${data.key}`;
+    const seqEl = document.getElementById('chord-sequence');
+    seqEl.innerHTML = '';
+    currentSequence.forEach((c, i) => {
+      const span = document.createElement('span');
+      span.className = 'chord-chip';
+      span.textContent = c.name;
+      seqEl.appendChild(span);
+    });
+    document.getElementById('result-card').classList.add('visible');
+  } catch (e) {
+    console.error(e);
+  } finally {
+    loading.classList.remove('visible');
+  }
+}
+
+document.getElementById('search-btn').addEventListener('click', doSearch);
+
+// ════════════ Playback ════════════
+function startAuto() {
+  stopAuto();
+  document.getElementById('play-btn').classList.add('active');
+  const playNext = () => {
+    const idx = autoStep % currentSequence.length;
+    const chord = currentSequence[idx];
+    chord.midi.forEach((n, i) => {
+      playNote(440 * Math.pow(2, (n - 69) / 12), actx.currentTime + i * 0.02);
+      if (keyEls[n]) {
+        keyEls[n].classList.add('lit');
+        setTimeout(() => keyEls[n].classList.remove('lit'), 500);
+      }
+    });
+    document.querySelectorAll('.chord-chip').forEach((el, i) => el.classList.toggle('active-chip', i === idx));
+    autoStep++;
+    const tempo = document.getElementById('tempo-slider').value;
+    autoTimer = setTimeout(playNext, (60 / tempo) * 2000);
+  };
+  playNext();
+}
+
+function stopAuto() {
+  clearTimeout(autoTimer);
+  document.getElementById('play-btn').classList.remove('active');
+  autoStep = 0;
+}
+
+document.getElementById('play-btn').addEventListener('click', startAuto);
+document.getElementById('stop-btn').addEventListener('click', stopAuto);
+
+// ════════════ Chord Buttons ════════════
+const PRESETS = [
+  {name:'C', notes:[60, 64, 67]},
+  {name:'G', notes:[55, 59, 62, 67]}, // 転回形
+  {name:'Am', notes:[57, 60, 64]},
+  {name:'F', notes:[53, 57, 60, 65]},
+  {name:'Em', notes:[52, 55, 59, 64]},
+  {name:'Dm', notes:[50, 53, 57, 62]},
+  {name:'G7', notes:[55, 59, 62, 65]},
+  {name:'B♭', notes:[58, 62, 65]}
+];
+
+const grid = document.createElement('div');
+grid.className = 'chord-grid';
+PRESETS.forEach(p => {
+  const btn = document.createElement('button');
+  btn.className = 'chord-btn';
+  btn.innerHTML = `<span class="btn-name">${p.name}</span>`;
+  btn.onclick = () => {
+    p.notes.forEach(n => {
+      playNote(440 * Math.pow(2, (n - 69) / 12), getCtx().currentTime);
+      if (keyEls[n]) {
+        keyEls[n].classList.add('lit');
+        setTimeout(() => keyEls[n].classList.remove('lit'), 500);
+      }
+    });
+  };
+  grid.appendChild(btn);
+});
+document.getElementById('chord-sections').appendChild(grid);
+
+// ════════════ Visualizer ════════════
+const canvas = document.getElementById('vis-canvas');
+const vc = canvas.getContext('2d');
+function draw() {
+  requestAnimationFrame(draw);
+  const w = canvas.width = canvas.offsetWidth;
+  const h = canvas.height = canvas.offsetHeight;
+  vc.clearRect(0,0,w,h);
+  if (!analyser) return;
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteTimeDomainData(data);
+  vc.beginPath(); vc.strokeStyle = '#c8a96e';
+  data.forEach((v, i) => {
+    const x = (i / data.length) * w;
+    const y = (v / 128) * (h / 2);
+    i === 0 ? vc.moveTo(x, y) : vc.lineTo(x, y);
+  });
+  vc.stroke();
+}
+draw();
+</script>
+</body>
+</html>
