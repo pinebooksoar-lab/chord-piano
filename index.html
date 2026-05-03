@@ -2,42 +2,42 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<title>Chord Piano - Improved Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Offline Chord Piano</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Mono:wght@300;400&display=swap');
 
 :root{
-  --bg:#0e0e12;
-  --surface:#16161e;
-  --card:#1e1e2a;
-  --border:#2a2a3a;
+  --bg:#0d0d11;
+  --surface:#17171f;
+  --card:#20202b;
+  --border:#2f2f40;
   --accent:#c8a96e;
-  --accent2:#7eb8c8;
-  --text:#e8e4dc;
-  --muted:#7b776f;
+  --text:#ece7df;
+  --muted:#807b73;
 }
 
 *{
-  box-sizing:border-box;
   margin:0;
   padding:0;
+  box-sizing:border-box;
 }
 
 body{
   background:var(--bg);
   color:var(--text);
   font-family:'DM Mono', monospace;
-  min-height:100vh;
-  padding:24px 12px 40px;
+  padding:24px 12px 50px;
   display:flex;
   justify-content:center;
 }
 
-.main-col{
+.main{
   width:100%;
-  max-width:700px;
+  max-width:760px;
 }
 
 header{
@@ -54,47 +54,46 @@ h1{
 
 .sub{
   color:var(--muted);
-  font-size:.75rem;
-  letter-spacing:.08em;
+  font-size:.72rem;
+  letter-spacing:.12em;
 }
 
 #visualizer{
-  width:100%;
-  height:70px;
-  background:var(--surface);
-  border:1px solid var(--border);
+  position:relative;
+  height:72px;
   border-radius:10px;
   overflow:hidden;
-  position:relative;
+  background:var(--surface);
+  border:1px solid var(--border);
   margin-bottom:18px;
 }
 
-#vis-canvas{
+#vis{
   width:100%;
   height:100%;
 }
 
-.chord-label{
+#chordLabel{
   position:absolute;
   inset:0;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
+  pointer-events:none;
   font-family:'Playfair Display', serif;
-  font-size:1.7rem;
+  font-size:1.6rem;
   color:var(--accent);
   opacity:0;
   transition:opacity .25s;
-  pointer-events:none;
 }
 
 .keyboard-wrap{
   overflow-x:auto;
-  background:#111;
+  background:#101014;
   border:1px solid var(--border);
   border-radius:10px;
   padding:12px;
-  margin-bottom:22px;
+  margin-bottom:24px;
   scrollbar-width:none;
 }
 
@@ -105,7 +104,7 @@ h1{
 #keyboard{
   position:relative;
   width:max-content;
-  height:170px;
+  height:180px;
   margin:auto;
 }
 
@@ -119,49 +118,49 @@ h1{
 
 .white{
   width:42px;
-  height:170px;
-  background:#f2f2f2;
+  height:180px;
+  background:#f3f3f3;
   border:1px solid #999;
   z-index:1;
 }
 
 .black{
   width:26px;
-  height:104px;
-  background:#1d1d1d;
+  height:108px;
+  background:#1c1c1c;
   border:1px solid #000;
   z-index:2;
 }
 
-.key.lit{
+.key.active{
   background:var(--accent) !important;
 }
 
-.section-label{
+.section-title{
   margin:22px 0 12px;
   font-size:.72rem;
+  letter-spacing:.15em;
   color:var(--muted);
-  letter-spacing:.14em;
   text-transform:uppercase;
   display:flex;
   align-items:center;
   gap:10px;
 }
 
-.section-label::after{
+.section-title::after{
   content:'';
   flex:1;
   height:1px;
   background:var(--border);
 }
 
-.chord-grid{
+.grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:10px;
 }
 
-.chord-btn{
+.chord{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:8px;
@@ -171,71 +170,74 @@ h1{
   transition:.08s;
 }
 
-.chord-btn:hover{
+.chord:hover{
   border-color:var(--accent);
 }
 
-.chord-btn:active{
+.chord:active{
   transform:scale(.96);
 }
 
-.btn-name{
+.chord span{
   font-family:'Playfair Display', serif;
-  font-size:1rem;
   color:var(--accent);
-  font-weight:700;
+  font-size:1rem;
 }
 
 .footer{
-  margin-top:26px;
   text-align:center;
-  font-size:.72rem;
+  margin-top:30px;
   color:var(--muted);
+  font-size:.7rem;
 }
 
-@media(max-width:560px){
-  .chord-grid{
+@media(max-width:580px){
+
+  .grid{
     grid-template-columns:repeat(3,1fr);
   }
+
 }
+
 </style>
 </head>
 
 <body>
 
-<div class="main-col">
+<div class="main">
 
 <header>
   <h1>Chord Piano</h1>
-  <div class="sub">Improved Voicing & Safer Audio Engine</div>
+  <div class="sub">OFFLINE • LOCAL AUDIO • NO API</div>
 </header>
 
 <div id="visualizer">
-  <canvas id="vis-canvas"></canvas>
-  <div class="chord-label" id="chord-label"></div>
+  <canvas id="vis"></canvas>
+  <div id="chordLabel"></div>
 </div>
 
 <div class="keyboard-wrap">
   <div id="keyboard"></div>
 </div>
 
-<div id="chord-sections"></div>
+<div id="sections"></div>
 
 <div class="footer">
-  Pure Offline Chord Piano • No API • Secure Local Audio
+  Pure Offline Chord Instrument
 </div>
 
 </div>
 
 <script type="module">
 
-// =========================
-// AUDIO ENGINE
-// =========================
+// ======================================
+// AUDIO
+// ======================================
 
 let audioCtx = null;
 let analyser = null;
-const activeNodes = [];
+
+const activeOscillators = [];
 
 function getAudio(){
 
@@ -254,45 +256,47 @@ function getAudio(){
   return audioCtx;
 }
 
-function midiToFreq(m){
-  return 440 * Math.pow(2, (m - 69) / 12);
+function midiToFreq(midi){
+
+  return 440 * Math.pow(
+    2,
+    (midi - 69) / 12
+  );
 }
 
-function stopAllSounds(){
-
-  activeNodes.forEach(node => {
-
-    try{
-      node.stop();
-    }catch(e){}
-
-    try{
-      node.disconnect();
-    }catch(e){}
-
-  });
-
-  activeNodes.length = 0;
-}
-
-function playVoice(midi, time, duration = 1.6, velocity = 0.18){
+function playTone(
+  midi,
+  start,
+  duration = 1.8,
+  velocity = 0.16
+){
 
   const ac = getAudio();
 
   const master = ac.createGain();
+
   master.connect(analyser);
 
-  // smoother piano-ish envelope
-  master.gain.setValueAtTime(0, time);
-  master.gain.linearRampToValueAtTime(velocity, time + 0.02);
-  master.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+  master.gain.setValueAtTime(
+    0,
+    start
+  );
 
-  // harmonic stack
+  master.gain.linearRampToValueAtTime(
+    velocity,
+    start + 0.02
+  );
+
+  master.gain.exponentialRampToValueAtTime(
+    0.0001,
+    start + duration
+  );
+
   const harmonics = [
-    {mul:1, gain:1.0},
-    {mul:2, gain:0.22},
-    {mul:3, gain:0.10},
-    {mul:4, gain:0.04}
+    {mul:1,gain:1.0},
+    {mul:2,gain:0.25},
+    {mul:3,gain:0.10},
+    {mul:4,gain:0.04}
   ];
 
   harmonics.forEach(h => {
@@ -300,25 +304,40 @@ function playVoice(midi, time, duration = 1.6, velocity = 0.18){
     const osc = ac.createOscillator();
     osc.type = 'sine';
 
-    osc.frequency.value = midiToFreq(midi) * h.mul;
+    osc.frequency.value =
+      midiToFreq(midi) * h.mul;
 
-    const g = ac.createGain();
-    g.gain.value = velocity * h.gain;
+    const gain = ac.createGain();
 
-    osc.connect(g);
-    g.connect(master);
+    gain.gain.value =
+      velocity * h.gain;
 
-    osc.start(time);
-    osc.stop(time + duration);
+    osc.connect(gain);
+    gain.connect(master);
+
+    osc.start(start);
+    osc.stop(start + duration);
+
+    activeOscillators.push(osc);
 
     osc.onended = () => {
 
-      try{ osc.disconnect(); }catch(e){}
-      try{ g.disconnect(); }catch(e){}
+      const idx =
+        activeOscillators.indexOf(osc);
 
+      if(idx !== -1){
+
+        activeOscillators.splice(idx,1);
+      }
+
+      try{
+        osc.disconnect();
+      }catch(e){}
+
+      try{
+        gain.disconnect();
+      }catch(e){}
     };
-
-    activeNodes.push(osc);
 
   });
 
@@ -328,35 +347,57 @@ function playVoice(midi, time, duration = 1.6, velocity = 0.18){
       master.disconnect();
     }catch(e){}
 
-  }, (duration * 1000) + 120);
+  }, (duration * 1000) + 100);
 }
 
-// =========================
+function stopAll(){
+
+  activeOscillators.forEach(osc => {
+
+    try{
+      osc.stop();
+    }catch(e){}
+
+    try{
+      osc.disconnect();
+    }catch(e){}
+  });
+
+  activeOscillators.length = 0;
+}
+
+// ======================================
 // MUSIC THEORY
-// =========================
+// ======================================
 
 const ROOTS = {
+
   'C':60,
   'C#':61,
   'Db':61,
+
   'D':62,
   'D#':63,
   'Eb':63,
+
   'E':64,
+
   'F':65,
   'F#':66,
   'Gb':66,
+
   'G':67,
   'G#':68,
   'Ab':68,
+
   'A':69,
   'A#':70,
   'Bb':70,
+
   'B':71
 };
 
-// proper voicings
-function buildChord(name){
+function getChordNotes(name){
 
   let chord = name.trim();
 
@@ -379,73 +420,131 @@ function buildChord(name){
 
   let root = ROOTS[rootName];
 
-  while(root > 59) root -= 12;
-  while(root < 48) root += 12;
+  while(root > 59){
+    root -= 12;
+  }
+
+  while(root < 48){
+    root += 12;
+  }
 
   const low = chord.toLowerCase();
 
-  let intervals;
+  let notes = [];
 
-  // detection order matters
+  // smoother piano voicings
 
   if(low.includes('maj7')){
 
-    intervals = [0,7,11,16];
+    notes = [
+      root,
+      root + 7,
+      root + 11,
+      root + 16
+    ];
 
   }else if(low.includes('m7b5')){
 
-    intervals = [0,3,6,10];
+    notes = [
+      root,
+      root + 6,
+      root + 10,
+      root + 15
+    ];
 
   }else if(low.includes('dim7')){
 
-    intervals = [0,3,6,9];
+    notes = [
+      root,
+      root + 3,
+      root + 6,
+      root + 9
+    ];
 
   }else if(low.includes('m7')){
 
-    intervals = [0,7,10,15];
-
-  }else if(low.includes('7')){
-
-    intervals = [0,10,16,19];
-
-  }else if(low.includes('sus4')){
-
-    intervals = [0,7,12,17];
-
-  }else if(low.includes('dim')){
-
-    intervals = [0,3,6,15];
-
-  }else if(low.includes('aug')){
-
-    intervals = [0,4,8,16];
+    notes = [
+      root,
+      root + 7,
+      root + 10,
+      root + 15
+    ];
 
   }else if(
     low.includes('min') ||
     /^m(?!aj)/.test(low)
   ){
 
-    intervals = [0,7,15];
+    notes = [
+      root,
+      root + 7,
+      root + 15
+    ];
+
+  }else if(low.includes('7')){
+
+    notes = [
+      root,
+      root + 10,
+      root + 16,
+      root + 19
+    ];
+
+  }else if(low.includes('sus4')){
+
+    notes = [
+      root,
+      root + 7,
+      root + 12,
+      root + 17
+    ];
+
+  }else if(low.includes('dim')){
+
+    notes = [
+      root,
+      root + 3,
+      root + 6,
+      root + 15
+    ];
+
+  }else if(low.includes('aug')){
+
+    notes = [
+      root,
+      root + 8,
+      root + 16
+    ];
 
   }else{
 
-    intervals = [0,7,16];
+    // major
+
+    notes = [
+      root,
+      root + 7,
+      root + 16
+    ];
   }
 
-  return intervals.map(i => root + i);
+  return notes;
 }
 
-// =========================
+// ======================================
 // KEYBOARD
-// =========================
+// ======================================
 
-const keyEls = {};
+const keyboard =
+  document.getElementById('keyboard');
 
-function initKeyboard(){
+const keyMap = {};
 
-  const kb = document.getElementById('keyboard');
+function createKeyboard(){
 
-  const whiteMap = [0,2,4,5,7,9,11];
+  const whitePitchClasses = [
+    0,2,4,5,7,9,11
+  ];
+
   const blackOffsets = {
     1:-13,
     3:-13,
@@ -458,50 +557,117 @@ function initKeyboard(){
 
   for(let midi=48; midi<=83; midi++){
 
-    const pc = midi % 12;
-    const isWhite = whiteMap.includes(pc);
+    const pitchClass = midi % 12;
 
-    const el = document.createElement('div');
+    const isWhite =
+      whitePitchClasses.includes(
+        pitchClass
+      );
 
-    el.className = `key ${isWhite ? 'white' : 'black'}`;
+    const key =
+      document.createElement('div');
+
+    key.className =
+      `key ${isWhite ? 'white' : 'black'}`;
 
     if(isWhite){
 
-      el.style.left = (whiteIndex * 42) + 'px';
+      key.style.left =
+        (whiteIndex * 42) + 'px';
+
       whiteIndex++;
 
     }else{
 
-      el.style.left =
-        ((whiteIndex * 42) + blackOffsets[pc]) + 'px';
+      key.style.left =
+        (
+          whiteIndex * 42
+          + blackOffsets[pitchClass]
+        ) + 'px';
     }
 
-    el.onmousedown = () => {
+    key.onmousedown = () => {
 
-      playVoice(midi, getAudio().currentTime, 1.4, 0.22);
+      playTone(
+        midi,
+        getAudio().currentTime,
+        1.5,
+        0.20
+      );
 
-      el.classList.add('lit');
-
-      setTimeout(() => {
-        el.classList.remove('lit');
-      }, 240);
+      lightKey(midi);
     };
 
-    keyEls[midi] = el;
-    kb.appendChild(el);
+    keyMap[midi] = key;
+
+    keyboard.appendChild(key);
   }
 }
 
-initKeyboard();
+createKeyboard();
 
-// =========================
-// CHORD BUTTONS
-// =========================
+function lightKey(midi){
 
-const SECTIONS = [
+  if(!keyMap[midi]) return;
+
+  keyMap[midi].classList.add('active');
+
+  setTimeout(() => {
+
+    keyMap[midi].classList.remove('active');
+
+  }, 400);
+}
+
+// ======================================
+// CHORD PLAY
+// ======================================
+
+function playChord(name){
+
+  const notes =
+    getChordNotes(name);
+
+  if(!notes) return;
+
+  const now =
+    getAudio().currentTime;
+
+  notes.forEach((midi,index) => {
+
+    playTone(
+      midi,
+      now + (index * 0.018),
+      1.8,
+      0.16
+    );
+
+    lightKey(midi);
+  });
+
+  const label =
+    document.getElementById(
+      'chordLabel'
+    );
+
+  label.textContent = name;
+  label.style.opacity = 1;
+
+  setTimeout(() => {
+
+    label.style.opacity = 0;
+
+  }, 900);
+}
+
+// ======================================
+// CHORD SECTIONS
+// ======================================
+
+const DATA = [
 
 {
-  label:'Basic',
+  title:'Basic',
   chords:[
     'C','Dm','Em','F',
     'G','Am','Bdim'
@@ -509,7 +675,7 @@ const SECTIONS = [
 },
 
 {
-  label:'Minor',
+  title:'Minor',
   chords:[
     'Cm','Dm','Em','Fm',
     'Gm','Am','Bm'
@@ -517,165 +683,146 @@ const SECTIONS = [
 },
 
 {
-  label:'7th',
+  title:'7th',
   chords:[
-    'C7','D7','E7','F7',
-    'G7','A7','B7'
+    'C7','D7','E7',
+    'F7','G7','A7'
   ]
 },
 
 {
-  label:'Maj7',
+  title:'Maj7',
   chords:[
-    'Cmaj7','Dmaj7','Emaj7',
-    'Fmaj7','Gmaj7','Amaj7'
+    'Cmaj7','Dmaj7',
+    'Fmaj7','Gmaj7',
+    'Amaj7'
   ]
 },
 
 {
-  label:'Extended',
+  title:'Soul / Jazz',
   chords:[
-    'Am7','Dm7','Em7',
-    'Gsus4','Csus4','F#m',
-    'Bb','Eb'
+    'Am7','Dm7',
+    'Em7','Gsus4',
+    'Csus4','Bb',
+    'Eb','F#m'
   ]
 }
 
 ];
 
-const sectionsEl =
-document.getElementById('chord-sections');
+const sections =
+  document.getElementById('sections');
 
-SECTIONS.forEach(sec => {
+DATA.forEach(section => {
 
-  const label = document.createElement('div');
-  label.className = 'section-label';
-  label.textContent = sec.label;
+  const title =
+    document.createElement('div');
 
-  sectionsEl.appendChild(label);
+  title.className = 'section-title';
+  title.textContent = section.title;
 
-  const grid = document.createElement('div');
-  grid.className = 'chord-grid';
+  sections.appendChild(title);
 
-  sec.chords.forEach(chord => {
+  const grid =
+    document.createElement('div');
 
-    const btn = document.createElement('div');
-    btn.className = 'chord-btn';
+  grid.className = 'grid';
+
+  section.chords.forEach(chord => {
+
+    const btn =
+      document.createElement('div');
+
+    btn.className = 'chord';
 
     btn.innerHTML =
-      `<span class="btn-name">${chord}</span>`;
+      `<span>${chord}</span>`;
 
-    btn.onclick = () => playChord(chord);
+    btn.onclick = () => {
+
+      playChord(chord);
+    };
 
     grid.appendChild(btn);
   });
 
-  sectionsEl.appendChild(grid);
-
+  sections.appendChild(grid);
 });
 
-// =========================
-// PLAY CHORD
-// =========================
-
-function playChord(name){
-
-  const notes = buildChord(name);
-
-  if(!notes) return;
-
-  const now = getAudio().currentTime;
-
-  notes.forEach((midi, index) => {
-
-    playVoice(
-      midi,
-      now + (index * 0.018),
-      1.8,
-      0.17
-    );
-
-    if(keyEls[midi]){
-
-      keyEls[midi].classList.add('lit');
-
-      setTimeout(() => {
-
-        keyEls[midi].classList.remove('lit');
-
-      }, 500);
-    }
-
-  });
-
-  const label =
-    document.getElementById('chord-label');
-
-  label.textContent = name;
-  label.style.opacity = 1;
-
-  setTimeout(() => {
-    label.style.opacity = 0;
-  }, 900);
-}
-
-// =========================
+// ======================================
 // VISUALIZER
-// =========================
+// ======================================
 
 const canvas =
-document.getElementById('vis-canvas');
+  document.getElementById('vis');
 
-const ctx = canvas.getContext('2d');
+const vctx =
+  canvas.getContext('2d');
 
 function draw(){
 
   requestAnimationFrame(draw);
 
-  const w = canvas.width = canvas.offsetWidth;
-  const h = canvas.height = canvas.offsetHeight;
+  const w =
+    canvas.width =
+    canvas.offsetWidth;
 
-  ctx.clearRect(0,0,w,h);
+  const h =
+    canvas.height =
+    canvas.offsetHeight;
+
+  vctx.clearRect(0,0,w,h);
 
   if(!analyser) return;
 
   const data =
-    new Uint8Array(analyser.frequencyBinCount);
+    new Uint8Array(
+      analyser.frequencyBinCount
+    );
 
   analyser.getByteTimeDomainData(data);
 
-  ctx.beginPath();
+  vctx.beginPath();
 
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = '#c8a96e';
+  vctx.lineWidth = 2;
+  vctx.strokeStyle = '#c8a96e';
 
   data.forEach((v,i) => {
 
-    const x = (i / data.length) * w;
+    const x =
+      (i / data.length) * w;
 
     const y =
-      ((v - 128) / 128) * (h / 2) + (h / 2);
+      (
+        ((v - 128) / 128)
+        * (h / 2)
+      ) + (h / 2);
 
     if(i === 0){
-      ctx.moveTo(x,y);
+
+      vctx.moveTo(x,y);
+
     }else{
-      ctx.lineTo(x,y);
+
+      vctx.lineTo(x,y);
     }
 
   });
 
-  ctx.stroke();
+  vctx.stroke();
 }
 
 draw();
 
-// =========================
+// ======================================
 // SAFETY
-// =========================
+// ======================================
 
-window.addEventListener('beforeunload', () => {
-  stopAllSounds();
-});
+window.addEventListener(
+  'beforeunload',
+  stopAll
+);
 
 </script>
 
